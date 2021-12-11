@@ -1,7 +1,3 @@
-# !pip install dash
-# !pip install pandas
-# !pip install sympy
-
 import dash
 from dash import dash_table
 from dash import dcc # dash core components
@@ -13,6 +9,8 @@ import requests
 import sympy
 import plotly.express as px
 
+# update to pull directly from local 'data' folder and move this script to the data folder 
+## and have this script call that script
 gs = 'gs://live.csv/'
 df = pd.read_csv(gs+'data_file.csv')
 
@@ -29,7 +27,7 @@ def page_header():
                                                 'paddingLeft': '4px', 'color': '#a3a7b0',
                                                 'textDecoration': 'none'})],
                className="two columns row",
-               href='https://github.com/blownhither/'),
+               href='https://github.com/blownhither/'), #change this as it references personal git page
     ], className="row")
 
 def description():
@@ -60,7 +58,7 @@ def weather_figure():
     live = pd.read_csv('live.csv')  ##import data 
     x = live['date']
     y = live['temp']
-    fig_line = px.scatter(live,
+    fig_line = px.line(live,
                         x = x, 
                         y = y, 
                         color = "city",
@@ -76,9 +74,9 @@ def weather_figure():
                             xanchor="right",
                             x=1))
                               
-    fig_scatter.update_layout(font=dict(size = 20))
+    fig_line.update_layout(font=dict(size = 20))
                               
-    fig_scatter.update_layout(template='plotly_white')
+    fig_line.update_layout(template='plotly_white')
     
     return html.Div(children=[dcc.Graph(figure = fig_line, 
                                         className = 'offset-by-one nine columns', 

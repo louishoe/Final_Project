@@ -1,1 +1,1 @@
-# data1050 project
+This project displays the historical, current, and forecasted weather, along side polution elements across the United States.
