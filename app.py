@@ -77,10 +77,10 @@ app.layout = html.Div([
 def display_choropleth(df):
     df = live
     fig = px.choropleth(df, color="temp", locations="STATE", locationmode="USA-states", scope="usa")
-    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_geos(fitbounds="locations", visible=True)
     fig.update_layout(title={'text':'Weather by State',
     'xanchor':'center',
-    'yanchor':'top',
+    'yanchor':'middle',
     'x':0.5})
 
     return fig
