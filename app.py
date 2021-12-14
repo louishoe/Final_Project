@@ -67,17 +67,23 @@ app.layout = html.Div([
         options=[{'value': x, 'label': x} 
                  for x in live['state']],
         value="Rhode Island"),
-    dcc.Graph(id="choropleth"),
+    dcc.Graph(id="choropleth")
+    #display_choropleth(live)
 ])
 
 @app.callback(
     Output("choropleth", "figure"), 
-    [Input("states", "value")])
-def display_choropleth(live):
-    fig = px.choropleth(live, color="temp", locations="STATE", locationmode="USA-states", scope="usa")
+    Input("states", "value"),)
+def display_choropleth(df):
+    df = live
+    fig = px.choropleth(df, color="temp", locations="STATE", locationmode="USA-states", scope="usa")
     fig.update_geos(fitbounds="locations", visible=False)
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.update_layout(title={'text':'Weather by State',
+    'xanchor':'center',
+    'yanchor':'top',
+    'x':0.5})
 
     return fig
 
-app.run_server(debug=True, host="0.0.0.0")
+if __name__ == '__main__':
+    app.run_server(debug=True)
