@@ -72,7 +72,7 @@ app.layout = html.Div([
 
 @app.callback(
     Output("choropleth", "figure"), 
-    [Input("state", "value")])
+    [Input("states", "value")])
 def display_choropleth(live):
     fig = px.choropleth(live, color="temp", locations="STATE", locationmode="USA-states", scope="usa")
     fig.update_geos(fitbounds="locations", visible=False)
