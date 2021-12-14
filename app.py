@@ -1,3 +1,5 @@
+
+
 import dash
 from dash import dash_table
 from dash import dcc # dash core components
@@ -11,8 +13,11 @@ import plotly.express as px
 
 # update to pull directly from local 'data' folder and move this script to the data folder 
 ## and have this script call that script
-gs = 'gs://live.csv/'
-df = pd.read_csv(gs+'data_file.csv')
+live = pd.read_csv('https://storage.googleapis.com/project-1050-data/live.csv')
+st_codes = pd.read_csv('https://storage.googleapis.com/project-1050-data/state_codes.csv')
+st_codes["STATE"] = st_codes["Alpha code"]
+
+live = live.join(st_codes.set_index('State'), on="state")
 
 def page_header():
     """
@@ -53,100 +58,26 @@ def description():
         **updates every 5 minutes**. 
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
-def weather_figure():
-    
-    live = pd.read_csv('live.csv')  ##import data 
-    x = live['date']
-    y = live['temp']
-    fig_line = px.line(live,
-                        x = x, 
-                        y = y, 
-                        color = "city",
-                        hover_data = ["city"], 
-                        line_shape="spline",
-                        render_mode="svg"
-                        height = 700)
-                            
-    fig_line.update_layout(legend=dict(
-                            orientation="h",
-                            yanchor="bottom",
-                            y=1.02,
-                            xanchor="right",
-                            x=1))
-                              
-    fig_line.update_layout(font=dict(size = 20))
-                              
-    fig_line.update_layout(template='plotly_white')
-    
-    return html.Div(children=[dcc.Graph(figure = fig_line, 
-                                        className = 'offset-by-one nine columns', 
-                                        style={'paddingLeft': '5%'})], 
-                    className="row")
-
-def forecast_figure():
-    
-    forecast = pd.read_csv
-    x = forecast['date']
-    fig = px.parallel_coordinates(forecast,
-                                color="species_id",
-                                labels={"species_id": "Species",
-                    "sepal_width": "Sepal Width", "sepal_length": "Sepal Length",
-                    "petal_width": "Petal Width", "petal_length": "Petal Length", },
-                        color_continuous_scale=px.colors.diverging.Tealrose, color_continuous_midpoint=2)
-
-    fig_bar.update_layout(xaxis_type='category')
-    
-    fig_bar.update_layout(legend=dict(
-                            orientation="h",
-                            yanchor="bottom",
-                            y=1.02,
-                            xanchor="right",
-                            x=1)) 
-    
-    fig_bar.update_layout(font=dict(size = 20))
-    
-    fig_bar.update_layout(template='plotly_dark',
-                          plot_bgcolor='#2d3339',
-                          paper_bgcolor='#5b6571')
-    
-    fig_bar.update_xaxes(showgrid = False)
-    fig_bar.update_yaxes(gridcolor='#717e8e', 
-                         layer = 'above traces')
-    
-    return html.Div(children=[dcc.Graph(figure = fig_bar, 
-                                        className = 'offset-by-one nine columns', 
-                                        style={'paddingLeft': '5%'})], 
-                    className="row")
-
-
 app = dash.Dash(__name__)
 
-app.layout = html.Div(
-    className="main",
-    children=[
-        html.H2("Temperature predictions"),
-        dcc.Input(id="lat", value='41.82831'),
-        dcc.Input(id="long", value='-71.40100'),
-        html.Button("Go", id="go"),
-        dcc.Graph(id='graph')
-    ]
-)
+app.layout = html.Div([
+        html.P("Current Weather in the United States:"),
+        dcc.Dropdown(
+        id='states', 
+        options=[{'value': x, 'label': x} 
+                 for x in live['state']],
+        value="Rhode Island"),
+    dcc.Graph(id="choropleth"),
+])
 
 @app.callback(
-    Output(component_id='graph', component_property='figure'),
-    Input(component_id='go', component_property='n_clicks'),
-    State(component_id='lat', component_property='value'),
-    State(component_id='long', component_property='value'),
-)
-def update_graph(n_clicks, lat, long):
-    response = requests.get(f"gs://project-1050-data/data_file.csv")
-    forecastUrl = response.json()["properties"]["forecastHourly"]
-    response = requests.get(forecastUrl)
-    hours = response.json()['properties']['periods']
-    df = pd.DataFrame({
-        'hours from now': range(len(hours)),
-        'temperature (F)': [hour['temperature'] for hour in hours],
-    })
-    return px.line(df, x = 'hours from now', y = 'temperature (F)')
+    Output("choropleth", "figure"), 
+    [Input("state", "value")])
+def display_choropleth(live):
+    fig = px.choropleth(live, color="temp", locations="STATE", locationmode="USA-states", scope="usa")
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+    return fig
 
 app.run_server(debug=True, host="0.0.0.0")

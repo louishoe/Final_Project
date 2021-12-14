@@ -3,3 +3,5 @@ pandas
 sympy
 numpy
 plotly
+fsspec
+gcsfs
