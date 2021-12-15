@@ -1,5 +1,3 @@
-
-
 import dash
 from dash import dash_table
 from dash import dcc # dash core components
@@ -11,26 +9,10 @@ import requests
 import sympy
 import plotly.express as px
 import plotly.graph_objs as go
-import datetime 
-from datetime import date, timedelta
-from datetime import datetime as dt
+from data_manipulation import import_data
 
-
-# update to pull directly from local 'data' folder and move this script to the data folder 
-## and have this script call that script
-live = pd.read_csv('https://storage.googleapis.com/project-1050-data/live.csv')
-st_codes = pd.read_csv('https://storage.googleapis.com/project-1050-data/state_codes.csv')
-
-live = live.join(st_codes.set_index('State'), on="state")
-live.rename(columns={"temp":"Temperature", "Alpha code":"STATE"}, inplace=True)
-
-# update the dataframe
-live['graph_date'] = live['UTC_date'] + ' '  + live['UTC_time']
-live['UTC_date'] = pd.to_datetime(live['UTC_date']).dt.date
-dt = date.today() - timedelta(1)
-dt = datetime.datetime.strptime(str(dt), '%Y-%m-%d').date()
-live_df = live[(live['UTC_date']>= dt)]
-
+#live, aqi_hist, weather_pred = import_data()
+live, aqi_hist, weather_pred = import_data()
 
 def page_header():
     """
@@ -87,7 +69,7 @@ def display_choropleth(df):
     Output("bar_line", "figure"), 
     [Input("states", "value")])
 def display_graph(states):
-    df = live_df[live_df['state'].eq(states)]
+    df = live[live['state'].eq(states)]
 
 
     bar_graph = go.Bar(x=df['graph_date'],
