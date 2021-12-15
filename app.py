@@ -49,33 +49,33 @@ app.layout = html.Div([
         options=[{'value': x, 'label': x} 
                  for x in live['state']],
         value="Rhode Island"),
-        dcc.Graph(id='gen_metrics_temp', style={'width': '33%','display': 'inline-block'} ),
-        dcc.Graph(id='gen_metrics_feels', style={'width': '33%','display': 'inline-block'} ),
-        dash.html.Img(id='gen_metrics_icons', style={'width': '20%','display': 'inline-block',  
+        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '33%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '33%','display': 'inline-block'} ),
+        dash.html.Img(id='gen_metrics_icons', style={'height':'30%','width': '20%','display': 'inline-block',  
         'padding-top': '50px','padding-bottom': '50px' } ),
         dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
         dcc.Graph(id="bar_line", style={'width': '50%','display': 'inline-block'}),
 
-        dcc.Graph(id="Weahter_forecast", style={'width': '50%','display': 'inline-block'}),
+        dcc.Graph(id="Weahter_forecast", style={'width': '40%'}),
         dcc.Tabs([
-        dcc.Tab(label='heatmap1', children=[
+        dcc.Tab(label='pm2.5', children=[
             dcc.Graph(id='heatmap1', style={'width': '50%','display': 'inline-block'})
-        ]),
-        dcc.Tab(label='heatmap2', children=[
+        ],style={'width': '5%','display': 'inline-block'}),
+        dcc.Tab(label='o3', children=[
             dcc.Graph(id='heatmap2', style={'width': '50%','display': 'inline-block'})
-        ]),
-        dcc.Tab(label='heatmap3', children=[
+        ],style={'width': '5%','display': 'inline-block'}),
+        dcc.Tab(label='pm10', children=[
             dcc.Graph(id='heatmap3', style={'width': '50%','display': 'inline-block'})
-        ]),
-         dcc.Tab(label='heatmap4', children=[
+        ],style={'width': '5%','display': 'inline-block'}),
+         dcc.Tab(label='no2', children=[
             dcc.Graph(id='heatmap4', style={'width': '50%','display': 'inline-block'})
-        ]),
-         dcc.Tab(label='heatmap5', children=[
+        ],style={'width': '5%','display': 'inline-block'}),
+         dcc.Tab(label='so2', children=[
             dcc.Graph(id='heatmap5', style={'width': '50%','display': 'inline-block'})
-        ]),
-         dcc.Tab(label='heatmap6', children=[
+        ],style={'width': '5%','display': 'inline-block'}),
+         dcc.Tab(label='co', children=[
             dcc.Graph(id='heatmap6', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '50%','display': 'inline-block'})])
+        ],style={'width': '5%','display': 'inline-block'})], style={'display': 'inline-block'})
       
 ])
 
