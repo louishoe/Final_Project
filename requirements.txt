@@ -6,3 +6,6 @@ plotly
 fsspec
 gcsfs
 datetime
+#scikit-image #skimag
+pillow
+#calendar

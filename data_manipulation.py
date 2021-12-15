@@ -29,6 +29,9 @@ def import_data():
     # makoing sure that no data before current year is brought in
     historic = historic[historic['date'] >= dt.datetime(today.year, 1, 1)]
     historic = historic.sort_values(by=['date'])
+
+    historic['month'] = pd.DatetimeIndex(historic['date']).month
+    historic['day'] = pd.DatetimeIndex(historic['date']).day
     # bring in the forecast for weatherr, whihc contains about 16 days worth of data (this dat get refreshed about once week)
     weather_pred = pd.read_csv('https://storage.googleapis.com/project-1050-data/weather_pred.csv')
     weather_pred['date_time'] = pd.to_datetime(weather_pred['Date time'])
