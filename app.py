@@ -15,9 +15,9 @@ import plotly.express as px
 ## and have this script call that script
 live = pd.read_csv('https://storage.googleapis.com/project-1050-data/live.csv')
 st_codes = pd.read_csv('https://storage.googleapis.com/project-1050-data/state_codes.csv')
-st_codes["STATE"] = st_codes["Alpha code"]
 
 live = live.join(st_codes.set_index('State'), on="state")
+live.rename(columns={"temp":"Temperature", "Alpha code":"STATE"}, inplace=True)
 
 def page_header():
     """
@@ -63,7 +63,7 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
         html.P("Current Weather in the United States:"),
         dcc.Dropdown(
-        id='states', 
+        id='USA_Temp_Map', 
         options=[{'value': x, 'label': x} 
                  for x in live['state']],
         value="Rhode Island"),
@@ -73,11 +73,10 @@ app.layout = html.Div([
 
 @app.callback(
     Output("choropleth", "figure"), 
-    Input("states", "value"),)
+    Input("USA_Temp_Map", "value"),)
 def display_choropleth(df):
     df = live
-    fig = px.choropleth(df, color="temp", locations="STATE", locationmode="USA-states", scope="usa")
-    fig.update_geos(fitbounds="locations", visible=True)
+    fig = px.choropleth(df, color="Temperature", locations="STATE", locationmode="USA-states", scope="usa")
     fig.update_layout(title={'text':'Weather by State',
     'xanchor':'center',
     'yanchor':'middle',
