@@ -10,6 +10,11 @@ from dash.dependencies import Input, Output, State
 import requests
 import sympy
 import plotly.express as px
+import plotly.graph_objs as go
+import datetime 
+from datetime import date, timedelta
+from datetime import datetime as dt
+
 
 # update to pull directly from local 'data' folder and move this script to the data folder 
 ## and have this script call that script
@@ -18,6 +23,14 @@ st_codes = pd.read_csv('https://storage.googleapis.com/project-1050-data/state_c
 
 live = live.join(st_codes.set_index('State'), on="state")
 live.rename(columns={"temp":"Temperature", "Alpha code":"STATE"}, inplace=True)
+
+# update the dataframe
+live['graph_date'] = live['UTC_date'] + ' '  + live['UTC_time']
+live['UTC_date'] = pd.to_datetime(live['UTC_date']).dt.date
+dt = date.today() - timedelta(1)
+dt = datetime.datetime.strptime(str(dt), '%Y-%m-%d').date()
+live_df = live[(live['UTC_date']>= dt)]
+
 
 def page_header():
     """
@@ -40,22 +53,7 @@ def description():
     Returns overall project description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
-        # Energy Planner
-        As of today, 138 cities in the U.S. have formally announced 100% renewable energy goals or
-        targets, while others are actively considering similar goals. Despite ambition and progress,
-        conversion towards renewable energy remains challenging.
-        Wind and solar power are becoming more cost effective, but they will always be unreliable
-        and intermittent sources of energy. They follow weather patterns with potential for lots of
-        variability. Solar power starts to die away right at sunset, when one of the two daily peaks
-        arrives (see orange curve for load).
-        **Energy Planner is a "What-If" tool to assist making power conversion plans.**
-        It can be used to explore load satisfiability under different power contribution with 
-        near-real-time energy production & consumption data.
-        ### Data Source
-        Energy Planner utilizes near-real-time energy production & consumption data from [BPA 
-        Balancing Authority](https://www.bpa.gov/news/AboutUs/Pages/default.aspx).
-        The [data source](https://transmission.bpa.gov/business/operations/Wind/baltwg.aspx) 
-        **updates every 5 minutes**. 
+        Place Description Here. 
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 app = dash.Dash(__name__)
@@ -63,26 +61,65 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
         html.P("Current Weather in the United States:"),
         dcc.Dropdown(
-        id='USA_Temp_Map', 
+        id='states', 
         options=[{'value': x, 'label': x} 
                  for x in live['state']],
         value="Rhode Island"),
-    dcc.Graph(id="choropleth")
+    dcc.Graph(id="USA_MAP",style={'display': 'inline-block'}),
+    dcc.Graph(id="bar_line", style={'display': 'inline-block'})
     #display_choropleth(live)
 ])
 
 @app.callback(
-    Output("choropleth", "figure"), 
-    Input("USA_Temp_Map", "value"),)
+    Output("USA_MAP", "figure"), 
+    Input("states", "value"),)
 def display_choropleth(df):
     df = live
     fig = px.choropleth(df, color="Temperature", locations="STATE", locationmode="USA-states", scope="usa")
-    fig.update_layout(title={'text':'Weather by State',
+    fig.update_layout(title={'text':'Current Temperature by State',
     'xanchor':'center',
-    'yanchor':'middle',
+    'yanchor':'top',
     'x':0.5})
 
     return fig
+
+@app.callback(
+    Output("bar_line", "figure"), 
+    [Input("states", "value")])
+def display_graph(states):
+    df = live_df[live_df['state'].eq(states)]
+
+
+    bar_graph = go.Bar(x=df['graph_date'],
+                    y=df['pm2.5'],
+                    name='pm2.5',
+                    yaxis='y1'
+                    )
+    line_graph = go.Line(x=df['graph_date'],
+                        y=df['Temperature'],
+                        name='Temperature',
+                        mode='lines+markers',
+                        yaxis='y2')
+
+    data = [line_graph, bar_graph]
+
+    layout = go.Layout(title={'text': 'Temperature and Pollution',
+         'y':0.9, # new
+         'x':0.5,
+         'xanchor': 'center',
+         'yanchor': 'top' # new
+        },
+                       yaxis=dict(title='pm2.5',
+                                   side='right'),
+                       yaxis2=dict(title='Temperature',
+                                   overlaying='y',
+                                   side='left'))
+
+    return go.Figure(data=data, layout=layout)
+
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
