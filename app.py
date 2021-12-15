@@ -64,7 +64,7 @@ def weather_figure():
                         color = "city",
                         hover_data = ["city"], 
                         line_shape="spline",
-                        render_mode="svg"
+                        render_mode="svg",
                         height = 700)
                             
     fig_line.update_layout(legend=dict(
@@ -83,38 +83,26 @@ def weather_figure():
                                         style={'paddingLeft': '5%'})], 
                     className="row")
 
-def forecast_figure():
+def historic_air():
+    """
+    Returns the historic air quality by state capital for the last year
+    """
     
-    forecast = pd.read_csv
-    x = forecast['date']
-    fig = px.parallel_coordinates(forecast,
-                                color="species_id",
-                                labels={"species_id": "Species",
-                    "sepal_width": "Sepal Width", "sepal_length": "Sepal Length",
-                    "petal_width": "Petal Width", "petal_length": "Petal Length", },
-                        color_continuous_scale=px.colors.diverging.Tealrose, color_continuous_midpoint=2)
+    historic = pd.read_csv('historic-air.csv')
+    historic['date'] =pd.to_datetime(historic.date)
+    today = datetime.today()
+    historic = historic[historic['date'] >= datetime(today.year, 1, 1)]
+    historic = historic.sort_values(by=['date'])
+    fig = px.line(historic, 
+                x = "date", 
+                y = " pm25", 
+                color = "Sate",
+                value = "Providence"
+            )
 
-    fig_bar.update_layout(xaxis_type='category')
-    
-    fig_bar.update_layout(legend=dict(
-                            orientation="h",
-                            yanchor="bottom",
-                            y=1.02,
-                            xanchor="right",
-                            x=1)) 
-    
-    fig_bar.update_layout(font=dict(size = 20))
-    
-    fig_bar.update_layout(template='plotly_dark',
-                          plot_bgcolor='#2d3339',
-                          paper_bgcolor='#5b6571')
-    
-    fig_bar.update_xaxes(showgrid = False)
-    fig_bar.update_yaxes(gridcolor='#717e8e', 
-                         layer = 'above traces')
-    
-    return html.Div(children=[dcc.Graph(figure = fig_bar, 
-                                        className = 'offset-by-one nine columns', 
+    fig.update_layout(font=dict(size = 20))
+                              
+    return html.Div(children=[dcc.Graph(figure = fig, 
                                         style={'paddingLeft': '5%'})], 
                     className="row")
 
