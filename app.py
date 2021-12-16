@@ -31,6 +31,8 @@ def description():
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 app = dash.Dash(__name__)
+server = app.server
+
 
 app.layout = html.Div([
         html.P("Weather and Pollution Analysis in the United States by State:"),
