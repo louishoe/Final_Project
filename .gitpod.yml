@@ -1,5 +1,5 @@
+ports:
+- port: 8050
+  onOpen: open-preview
 tasks:
-  - init: |
-      echo 'TODO: build project'
-    command: |
-      echo 'TODO: start app'
+- init: sh /workspace/GHGEmission/run.sh
