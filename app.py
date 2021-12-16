@@ -16,18 +16,34 @@ import calendar
 live, aqi_hist, weather_pred, pol_stats, region_df = import_data()
 
 
-def page_header():
+def weather_description():
     """
-    Returns the page header as a dash `html.Div`
-    """
-    pass
-
-def description():
-    """
-    Returns overall project description in markdown
+    Returns weather dashboard description in markdown. Default is Providence, Rhode Island
     """
     return html.Div(children=[dcc.Markdown('''
-        Place Description Here. 
+        ## Current Weather and Air Quality Index
+        ### Please select a state
+        ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
+
+def air_quality_historic_description():
+    """
+    Returns aqi historic heatmap description in markdown
+    """
+    return html.Div(children=[dcc.Markdown('''
+        ## AQI Heatmap 2021 
+        ### The heatmap shows the air pollutents through out 2021.
+        ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
+
+def data_source(): 
+    """
+    Returns data source description in markdown
+    """
+    return html.Div(children=[dcc.Markdown('''
+        ##### Data Source:
+        ##### Live Weather [OpenWeather](http://openweathermap.org/) **updates every hour**
+        ##### Live Air Quality Index [The World Air Quality Project](http://aqicn.org/) **updates every hour**
+        ##### Historic Air Quality Index [The World Air Quality Project](http://aqicn.org/) **updates every week**
+        ##### Weather Forecast [Visual Corssing](https://www.visualcrossing.com) **updates every week**
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 app = dash.Dash(__name__)
@@ -36,6 +52,7 @@ server = app.server
 
 app.layout = html.Div([
         html.P("Weather and Pollution Analysis in the United States by State:"),
+        weather_description(),
         dcc.Dropdown(
         id='states', 
         options=[{'value': x, 'label': x} 
@@ -53,7 +70,7 @@ app.layout = html.Div([
 
         dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
         dcc.Graph(id="bar_line", style={'width': '50%','display': 'inline-block'}),
-
+        air_quality_historic_description(),
         dcc.Graph(id="Weahter_forecast", style={'width': '100%'}),
         dcc.Graph(id='slideshow', style={'display': 'inline'}),
         dcc.Tabs([
@@ -74,7 +91,8 @@ app.layout = html.Div([
         ],style={'display': 'inline-block'}),
          dcc.Tab(label='co', children=[
             dcc.Graph(id='heatmap6', style={'display': 'inline'})
-        ],style={'display': 'inline-block'})], style={'display': 'inline-block'})
+        ],style={'display': 'inline-block'})], style={'display': 'inline-block'}),
+        data_source()
         
       
 ])
