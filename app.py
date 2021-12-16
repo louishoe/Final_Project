@@ -13,7 +13,7 @@ from data_manipulation import import_data
 from weather_visuals import icons
 import calendar
 
-live, aqi_hist, weather_pred, pol_stats = import_data()
+live, aqi_hist, weather_pred, pol_stats, region_df = import_data()
 
 
 def page_header():
@@ -51,7 +51,7 @@ app.layout = html.Div([
         value="Rhode Island"),
 
         
-        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '20%','display': 'inline-block'}),
         dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '20%','display': 'inline-block'} ),
         dash.html.Img(id='gen_metrics_icons', style={'height':'30%','width': '20%','display': 'inline-block',  
         'padding-top': '50px','padding-bottom': '50px' } ),
@@ -62,7 +62,8 @@ app.layout = html.Div([
         dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
         dcc.Graph(id="bar_line", style={'width': '50%','display': 'inline-block'}),
 
-        dcc.Graph(id="Weahter_forecast", style={'width': '40%'}),
+        dcc.Graph(id="Weahter_forecast", style={'width': '100%'}),
+        dcc.Graph(id='slideshow', style={'display': 'inline'}),
         dcc.Tabs([
         dcc.Tab(label='pm2.5', children=[
             dcc.Graph(id='heatmap1', style={'display': 'inline'})
@@ -82,6 +83,7 @@ app.layout = html.Div([
          dcc.Tab(label='co', children=[
             dcc.Graph(id='heatmap6', style={'display': 'inline'})
         ],style={'display': 'inline-block'})], style={'display': 'inline-block'})
+        
       
 ])
 
@@ -104,7 +106,6 @@ def display_choropleth(df):
 def display_graph(states):
     df = live[live['state'].eq(states)]
 
-
     bar_graph = go.Bar(x=df['graph_date'],
                     y=df['pm2.5'],
                     name='pm2.5',
@@ -122,8 +123,9 @@ def display_graph(states):
          'y':0.9, # new
          'x':0.5,
          'xanchor': 'center',
-         'yanchor': 'top' # new
+         'yanchor': 'top'
         },
+                 plot_bgcolor='rgb(255,255,255)',
                        yaxis=dict(title='pm2.5',
                                    side='right'),
                        yaxis2=dict(title='Temperature (°F)',
@@ -141,6 +143,7 @@ def weather_pre(states):
     fig = px.line(
         x = df['date_time'],
         y = df['Temperature'],
+        template= "simple_white"
     )
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(title_text='Temperture (°F)')
@@ -272,6 +275,48 @@ def display_graph(states):
                    hoverongaps = False))
 
     return fig1, fig2, fig3, fig4, fig5, fig6
+
+@app.callback(
+    Output("slideshow", "figure"), 
+    [Input("states", "value")])
+def display_graph(states):
+    df_get_region = region_df[region_df['state'].eq(states)]
+    region = df_get_region['region'].iloc[0]
+    regional_df = region_df[region_df['region'].eq(region)]
+    regional_df['month'] = pd.DatetimeIndex(regional_df['date']).month
+    regional_df['day'] = pd.DatetimeIndex(regional_df['date']).day
+
+    fig = px.scatter(regional_df, x="day",  
+            y=" pm25", 
+            animation_frame="date", animation_group="state",
+           size="pop", color="state", hover_name="state", facet_col="region", text="state",
+           title="Comparing AQI of " + states + "'s Neighboring States", 
+            size_max=45, range_x=[1,31],range_y=[0,90],
+            template= "simple_white")
+
+    fig.update_layout(
+        autosize=False,
+        xaxis = dict(
+        range=[1,31], # update
+        tickmode = 'array',
+        tickvals = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
+    ),)
+
+    return fig
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
