@@ -2,4 +2,4 @@ ports:
 - port: 8050
   onOpen: open-preview
 tasks:
-- init: sh /workspace/GHGEmission/run.sh
+- init: sh /workspace/Final_Project/run.sh
