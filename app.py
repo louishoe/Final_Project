@@ -81,7 +81,7 @@ app.layout = html.Div([
         dcc.Graph(id="Weahter_forecast", style={'width': '100%'}),
     
         air_quality_historic_description(),
-        dcc.Graph(id='slideshow', style={'display': 'inline'}),
+        dcc.Graph(id='slideshow', style={'display': 'inline-block', "width":"100%"}),
         dcc.Tabs([
         dcc.Tab(label='pm2.5', children=[
             dcc.Graph(id='heatmap1', style={'display': 'inline'})
