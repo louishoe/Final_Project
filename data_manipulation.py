@@ -44,12 +44,14 @@ def import_data():
 
 
     pol_stats = today_live.copy()
-    pol_stats = pol_stats[['state','pm2.5','co','no2','o3']]
+    pol_stats = pol_stats[['state','aqi']]
+    pol_stats['aqi'] = pol_stats['aqi'].astype(float)
+    #usa_stats = pol_stats[['aqi']]
+    #usa_stats['country'] = 'USA'
+    #cols = ['country','aqi']
+    #usa_stats = usa_stats[cols]
+    #usa_stats = usa_stats.groupby('country', as_index=False).mean()
 
-    usa_stats = pol_stats[['pm2.5','co','no2','o3']]
-    usa_stats['country'] = 'USA'
-    cols = ['country','pm2.5','co','no2','o3']
-    usa_stats = usa_stats[cols]
-    usa_stats = usa_stats.groupby('country', as_index=False).mean()
 
-    return live , historic , weather_pred, pol_stats, usa_stats
+
+    return live , historic , weather_pred, pol_stats 

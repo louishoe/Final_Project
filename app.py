@@ -13,7 +13,7 @@ from data_manipulation import import_data
 from weather_visuals import icons
 import calendar
 
-live, aqi_hist, weather_pred, pol_stats, usa_stats = import_data()
+live, aqi_hist, weather_pred, pol_stats = import_data()
 
 
 def page_header():
@@ -49,11 +49,16 @@ app.layout = html.Div([
         options=[{'value': x, 'label': x} 
                  for x in live['state']],
         value="Rhode Island"),
-        dcc.Graph(id="bar", style={'height':'30%','width': '25%','display': 'inline-block'} ),
-        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '25%','display': 'inline-block'} ),
-        dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '25%','display': 'inline-block'} ),
+
+        
+        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '20%','display': 'inline-block'} ),
         dash.html.Img(id='gen_metrics_icons', style={'height':'30%','width': '20%','display': 'inline-block',  
         'padding-top': '50px','padding-bottom': '50px' } ),
+        dcc.Graph(id='gen_metrics_stateAQI', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_usAQI', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        #dcc.Graph(id="bar", style={'height':'30%','width': '30%','display': 'inline-block'} ),
+
         dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
         dcc.Graph(id="bar_line", style={'width': '50%','display': 'inline-block'}),
 
@@ -148,6 +153,8 @@ def weather_pre(states):
 @app.callback(
     Output("gen_metrics_temp", 'figure'), 
     Output("gen_metrics_feels", 'figure'),
+    Output("gen_metrics_stateAQI", 'figure'),
+    Output("gen_metrics_usAQI", 'figure'),
     Output("gen_metrics_icons", 'src'),
     [Input("states", "value")])
 def general_metrics(states):
@@ -160,19 +167,39 @@ def general_metrics(states):
     fig1 = go.Figure(go.Indicator(
     mode = "number",
     value = daily_metrics.Temperature.values[0],
-    number = {'suffix': " °F"},
+    number = {'suffix': " °F", 'font': {"size":65 }},
+        title = {"text": "Current Temperature<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
     domain = {'x': [0, 1], 'y': [0, 1]}))
-    fig1.update_layout(paper_bgcolor = "lightgray")
-
+ 
     fig2 = go.Figure(go.Indicator(
     mode = "number",
     value = daily_metrics.feels_like.values[0],
-    number = {'suffix': " °F"},
+    number = {'suffix': " °F", 'font': {"size":65 }},
+        title = {"text": "Feels like<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
     domain = {'x': [0, 1], 'y': [0, 1]}))
-    fig1.update_layout(paper_bgcolor = "lightgray")
+
+    cur_state = pol_stats[pol_stats['state'].eq(states)]
+    cur_state = cur_state.melt(id_vars=["state"], 
+        var_name="Pollution", 
+        value_name="Value")
+
+
+    fig3 = go.Figure(go.Indicator(
+    mode = "number",
+    value = cur_state.Value.values[0],
+        number = {'font': {"size":65 }},
+        title = {"text": "Current State AQI<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
+
+    fig4 = go.Figure(go.Indicator(
+    mode = "number",
+    value = pol_stats.aqi.mean(),
+        number = {'font': {"size":65 }},
+        title = {"text": "Average State AQI<br><span style='font-size:0.8em;color:gray'>Overall</span>"},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
 
     image = icons(daily_metrics, 'weather_description')
-    return fig1, fig2, image
+    return fig1, fig2, fig3, fig4, image
 
 @app.callback(
     Output("heatmap1", "figure"), 
@@ -245,37 +272,6 @@ def display_graph(states):
                    hoverongaps = False))
 
     return fig1, fig2, fig3, fig4, fig5, fig6
-
-
-@app.callback(
-    Output("bar", "figure"), 
-    [Input("states", "value")])
-def display_graph(states):
-
-    df = pol_stats[pol_stats['state'].eq(states)]
-    df = df.melt(id_vars=["state"], 
-        var_name="Pollution", 
-        value_name="Value")
-    df_usa = usa_stats.melt(id_vars=["country"], 
-        var_name="Pollution", 
-        value_name="Value")
-
-    concat_df = pd.concat([df, df_usa.rename(columns={'country':'state'})])
-
-
-    fig = px.bar(concat_df, x="Value", y="Pollution", orientation='h', color='state', barmode="group")
-    fig.update_xaxes(title_text='AQI')
-    fig.update_yaxes(title_text='Today\'s Air Quality Index by Pollutant')
-    fig.update_layout(legend=dict(
-    orientation="h",
-    yanchor="bottom",
-    y=1.02,
-    xanchor="right",
-    x=1))
-    return fig
-
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
