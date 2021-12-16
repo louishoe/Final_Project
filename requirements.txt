@@ -3,3 +3,7 @@ pandas
 sympy
 numpy
 plotly
+fsspec
+gcsfs
+datetime
+pillow

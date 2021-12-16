@@ -8,133 +8,305 @@ from dash.dependencies import Input, Output, State
 import requests
 import sympy
 import plotly.express as px
+import plotly.graph_objs as go
+from data_manipulation import import_data
+from weather_visuals import icons
+import calendar
 
-# update to pull directly from local 'data' folder and move this script to the data folder 
-## and have this script call that script
-gs = 'gs://live.csv/'
-df = pd.read_csv(gs+'data_file.csv')
+live, aqi_hist, weather_pred, pol_stats, region_df = import_data()
+
 
 def page_header():
     """
     Returns the page header as a dash `html.Div`
     """
-    return html.Div(id='header', children=[
-        html.Div([html.H3('Visualization with datashader and Plotly')],
-                 className="ten columns"),
-        html.A([html.Img(id='logo', src=app.get_asset_url('github.png'),
-                         style={'height': '35px', 'paddingTop': '7%'}),
-                html.Span('Blownhither', style={'fontSize': '2rem', 'height': '35px', 'bottom': 0,
-                                                'paddingLeft': '4px', 'color': '#a3a7b0',
-                                                'textDecoration': 'none'})],
-               className="two columns row",
-               href='https://github.com/blownhither/'), #change this as it references personal git page
-    ], className="row")
+    pass
 
 def description():
     """
     Returns overall project description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
-        # Energy Planner
-        As of today, 138 cities in the U.S. have formally announced 100% renewable energy goals or
-        targets, while others are actively considering similar goals. Despite ambition and progress,
-        conversion towards renewable energy remains challenging.
-        Wind and solar power are becoming more cost effective, but they will always be unreliable
-        and intermittent sources of energy. They follow weather patterns with potential for lots of
-        variability. Solar power starts to die away right at sunset, when one of the two daily peaks
-        arrives (see orange curve for load).
-        **Energy Planner is a "What-If" tool to assist making power conversion plans.**
-        It can be used to explore load satisfiability under different power contribution with 
-        near-real-time energy production & consumption data.
-        ### Data Source
-        Energy Planner utilizes near-real-time energy production & consumption data from [BPA 
-        Balancing Authority](https://www.bpa.gov/news/AboutUs/Pages/default.aspx).
-        The [data source](https://transmission.bpa.gov/business/operations/Wind/baltwg.aspx) 
-        **updates every 5 minutes**. 
+        Place Description Here. 
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
-
-def weather_figure():
-    
-    live = pd.read_csv('live.csv')  ##import data 
-    x = live['date']
-    y = live['temp']
-    fig_line = px.line(live,
-                        x = x, 
-                        y = y, 
-                        color = "city",
-                        hover_data = ["city"], 
-                        line_shape="spline",
-                        render_mode="svg",
-                        height = 700)
-                            
-    fig_line.update_layout(legend=dict(
-                            orientation="h",
-                            yanchor="bottom",
-                            y=1.02,
-                            xanchor="right",
-                            x=1))
-                              
-    fig_line.update_layout(font=dict(size = 20))
-                              
-    fig_line.update_layout(template='plotly_white')
-    
-    return html.Div(children=[dcc.Graph(figure = fig_line, 
-                                        className = 'offset-by-one nine columns', 
-                                        style={'paddingLeft': '5%'})], 
-                    className="row")
-
-def historic_air():
-    """
-    Returns the historic air quality by state capital for the last year
-    """
-    
-    historic = pd.read_csv('historic-air.csv')
-    historic['date'] =pd.to_datetime(historic.date)
-    today = datetime.today()
-    historic = historic[historic['date'] >= datetime(today.year, 1, 1)]
-    historic = historic.sort_values(by=['date'])
-    fig = px.line(historic, 
-                x = "date", 
-                y = " pm25", 
-                color = "Sate",
-                value = "Providence"
-            )
-
-    fig.update_layout(font=dict(size = 20))
-                              
-    return html.Div(children=[dcc.Graph(figure = fig, 
-                                        style={'paddingLeft': '5%'})], 
-                    className="row")
-
 
 app = dash.Dash(__name__)
 
-app.layout = html.Div(
-    className="main",
-    children=[
-        html.H2("Temperature predictions"),
-        dcc.Input(id="lat", value='41.82831'),
-        dcc.Input(id="long", value='-71.40100'),
-        html.Button("Go", id="go"),
-        dcc.Graph(id='graph')
-    ]
-)
+app.layout = html.Div([
+        html.P("Weather and Pollution Analysis in the United States by State:"),
+        dcc.Dropdown(
+        id='states', 
+        options=[{'value': x, 'label': x} 
+                 for x in live['state']],
+        value="Rhode Island"),
+
+        
+        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '20%','display': 'inline-block'}),
+        dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        dash.html.Img(id='gen_metrics_icons', style={'height':'30%','width': '20%','display': 'inline-block',  
+        'padding-top': '50px','padding-bottom': '50px' } ),
+        dcc.Graph(id='gen_metrics_stateAQI', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_usAQI', style={'height':'30%','width': '20%','display': 'inline-block'} ),
+        #dcc.Graph(id="bar", style={'height':'30%','width': '30%','display': 'inline-block'} ),
+
+        dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
+        dcc.Graph(id="bar_line", style={'width': '50%','display': 'inline-block'}),
+
+        dcc.Graph(id="Weahter_forecast", style={'width': '100%'}),
+        dcc.Graph(id='slideshow', style={'display': 'inline'}),
+        dcc.Tabs([
+        dcc.Tab(label='pm2.5', children=[
+            dcc.Graph(id='heatmap1', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
+        dcc.Tab(label='o3', children=[
+            dcc.Graph(id='heatmap2', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
+        dcc.Tab(label='pm10', children=[
+            dcc.Graph(id='heatmap3', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
+         dcc.Tab(label='no2', children=[
+            dcc.Graph(id='heatmap4', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
+         dcc.Tab(label='so2', children=[
+            dcc.Graph(id='heatmap5', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
+         dcc.Tab(label='co', children=[
+            dcc.Graph(id='heatmap6', style={'display': 'inline'})
+        ],style={'display': 'inline-block'})], style={'display': 'inline-block'})
+        
+      
+])
 
 @app.callback(
-    Output(component_id='graph', component_property='figure'),
-    Input(component_id='go', component_property='n_clicks'),
-    State(component_id='lat', component_property='value'),
-    State(component_id='long', component_property='value'),
-)
-def update_graph(n_clicks, lat, long):
-    response = requests.get(f"gs://project-1050-data/data_file.csv")
-    forecastUrl = response.json()["properties"]["forecastHourly"]
-    response = requests.get(forecastUrl)
-    hours = response.json()['properties']['periods']
-    df = pd.DataFrame({
-        'hours from now': range(len(hours)),
-        'temperature (F)': [hour['temperature'] for hour in hours],
-    })
-    return px.line(df, x = 'hours from now', y = 'temperature (F)')
+    Output("USA_MAP", "figure"), 
+    Input("states", "value"),)
+def display_choropleth(df):
+    df = live
+    fig = px.choropleth(df, color="Temperature", locations="STATE", locationmode="USA-states", scope="usa")
+    fig.update_layout(title={'text':'Current Temperature by State',
+    'xanchor':'center',
+    'yanchor':'top',
+    'x':0.5})
 
-app.run_server(debug=True, host="0.0.0.0")
+    return fig
+
+@app.callback(
+    Output("bar_line", "figure"), 
+    [Input("states", "value")])
+def display_graph(states):
+    df = live[live['state'].eq(states)]
+
+    bar_graph = go.Bar(x=df['graph_date'],
+                    y=df['pm2.5'],
+                    name='pm2.5',
+                    yaxis='y1'
+                    )
+    line_graph = go.Line(x=df['graph_date'],
+                        y=df['Temperature'],
+                        name='Temperature (°F)',
+                        mode='lines+markers',
+                        yaxis='y2')
+
+    data = [line_graph, bar_graph]
+
+    layout = go.Layout(title={'text': '{state}\'s Hourly Temperature and Pollution'.format(state=states),
+         'y':0.9, # new
+         'x':0.5,
+         'xanchor': 'center',
+         'yanchor': 'top'
+        },
+                 plot_bgcolor='rgb(255,255,255)',
+                       yaxis=dict(title='pm2.5',
+                                   side='right'),
+                       yaxis2=dict(title='Temperature (°F)',
+                                   overlaying='y',
+                                   side='left'))
+
+    return go.Figure(data=data, layout=layout)
+
+
+@app.callback(
+    Output("Weahter_forecast", "figure"), 
+    [Input("states", "value")])
+def weather_pre(states):
+    df = weather_pred[weather_pred['state'].eq(states)]
+    fig = px.line(
+        x = df['date_time'],
+        y = df['Temperature'],
+        template= "simple_white"
+    )
+    fig.update_xaxes(title_text='Date')
+    fig.update_yaxes(title_text='Temperture (°F)')
+    fig.update_layout(title={'text':'{state}\'s Temperature Forecast'.format(state=states),
+    'xanchor':'center',
+    'yanchor':'top',
+    'x':0.5})
+    return fig
+
+@app.callback(
+    Output("gen_metrics_temp", 'figure'), 
+    Output("gen_metrics_feels", 'figure'),
+    Output("gen_metrics_stateAQI", 'figure'),
+    Output("gen_metrics_usAQI", 'figure'),
+    Output("gen_metrics_icons", 'src'),
+    [Input("states", "value")])
+def general_metrics(states):
+    daily_metrics = live[live['state']==states]
+    daily_metrics['hour'] = daily_metrics['UTC_time'].str[:2]
+    daily_metrics['hour'] = daily_metrics['hour'].astype(str).astype(int)
+    daily_metrics = daily_metrics.loc[daily_metrics.groupby(['city', 'state'])['hour'].idxmax()]
+    daily_metrics = daily_metrics[['city', 'state','Temperature', 'feels_like','weather_description']]
+    
+    fig1 = go.Figure(go.Indicator(
+    mode = "number",
+    value = daily_metrics.Temperature.values[0],
+    number = {'suffix': " °F", 'font': {"size":65 }},
+        title = {"text": "Current Temperature<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
+ 
+    fig2 = go.Figure(go.Indicator(
+    mode = "number",
+    value = daily_metrics.feels_like.values[0],
+    number = {'suffix': " °F", 'font': {"size":65 }},
+        title = {"text": "Feels like<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
+
+    cur_state = pol_stats[pol_stats['state'].eq(states)]
+    cur_state = cur_state.melt(id_vars=["state"], 
+        var_name="Pollution", 
+        value_name="Value")
+
+
+    fig3 = go.Figure(go.Indicator(
+    mode = "number",
+    value = cur_state.Value.values[0],
+        number = {'font': {"size":65 }},
+        title = {"text": "Current State AQI<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
+
+    fig4 = go.Figure(go.Indicator(
+    mode = "number",
+    value = pol_stats.aqi.mean(),
+        number = {'font': {"size":65 }},
+        title = {"text": "Average State AQI<br><span style='font-size:0.8em;color:gray'>Overall</span>"},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
+
+    image = icons(daily_metrics, 'weather_description')
+    return fig1, fig2, fig3, fig4, image
+
+@app.callback(
+    Output("heatmap1", "figure"), 
+    Output("heatmap2", "figure"),
+    Output("heatmap3", "figure"), 
+    Output("heatmap4", "figure"), 
+    Output("heatmap5", "figure"), 
+    Output("heatmap6", "figure"),  
+    Input("states", "value"))
+    #Input("pollutant", "value"),)
+def display_graph(states):
+    df = aqi_hist.copy()
+    df = df[['state','city','month', 'day', ' pm25', ' o3', ' pm10', ' no2',' so2', ' co']]
+    aqi_hist_month = df.groupby(['state', 'city','month', 'day'], as_index=False).mean()
+    aqi_hist_month = df.fillna(0)
+    df = aqi_hist_month[aqi_hist_month['state'].eq(states)]
+    
+    df1 = aqi_hist_month[['month','day', ' pm25']].reset_index(drop=True)
+    df1 = df1.sort_values(by=['month','day'])
+    df1['Month_name'] = df1['month'].apply(lambda x: calendar.month_abbr[x])
+    fig1 = go.Figure(data=go.Heatmap(
+                   z=df1[' pm25'],
+                   x=df1['day'],
+                   y=df1['Month_name'],
+                   hoverongaps = False))
+
+    df2 = aqi_hist_month[['month','day', ' o3']].reset_index(drop=True)
+    df2 = df2.sort_values(by=['month','day'])
+    df2['Month_name'] = df2['month'].apply(lambda x: calendar.month_abbr[x])
+    fig2 = go.Figure(data=go.Heatmap(
+                   z=df2[' o3'],
+                   x=df2['day'],
+                   y=df2['Month_name'],
+                   hoverongaps = False))
+
+    df3 = aqi_hist_month[['month','day', ' pm10']].reset_index(drop=True)
+    df3 = df3.sort_values(by=['month','day'])
+    df3['Month_name'] = df3['month'].apply(lambda x: calendar.month_abbr[x])
+    fig3 = go.Figure(data=go.Heatmap(
+                   z=df3[' pm10'],
+                   x=df3['day'],
+                   y=df3['Month_name'],
+                   hoverongaps = False))
+
+    df4 = aqi_hist_month[['month','day', ' no2']].reset_index(drop=True)
+    df4 = df4.sort_values(by=['month','day'])
+    df4['Month_name'] = df4['month'].apply(lambda x: calendar.month_abbr[x])
+    fig4 = go.Figure(data=go.Heatmap(
+                   z=df4[' no2'],
+                   x=df4['day'],
+                   y=df4['Month_name'],
+                   hoverongaps = False))
+
+    df5 = aqi_hist_month[['month','day', ' so2']].reset_index(drop=True)
+    df5 = df5.sort_values(by=['month','day'])
+    df5['Month_name'] = df5['month'].apply(lambda x: calendar.month_abbr[x])
+    fig5 = go.Figure(data=go.Heatmap(
+                   z=df5[' so2'],
+                   x=df5['day'],
+                   y=df5['Month_name'],
+                   hoverongaps = False))
+
+    df6 = aqi_hist_month[['month','day', ' co']].reset_index(drop=True)
+    df6 = df6.sort_values(by=['month','day'])
+    df6['Month_name'] = df6['month'].apply(lambda x: calendar.month_abbr[x])
+    fig6 = go.Figure(data=go.Heatmap(
+                   z=df6[' co'],
+                   x=df6['day'],
+                   y=df6['Month_name'],
+                   hoverongaps = False))
+
+    return fig1, fig2, fig3, fig4, fig5, fig6
+
+@app.callback(
+    Output("slideshow", "figure"), 
+    [Input("states", "value")])
+def display_graph(states):
+    df_get_region = region_df[region_df['state'].eq(states)]
+    region = df_get_region['region'].iloc[0]
+    regional_df = region_df[region_df['region'].eq(region)]
+    regional_df['month'] = pd.DatetimeIndex(regional_df['date']).month
+    regional_df['day'] = pd.DatetimeIndex(regional_df['date']).day
+
+    fig = px.scatter(regional_df, x="day",  
+            y=" pm25", 
+            animation_frame="date", animation_group="state",
+           size="pop", color="state", hover_name="state", facet_col="region", text="state",
+           title="Comparing AQI of " + states + "'s Neighboring States", 
+            size_max=45, range_x=[1,31],range_y=[0,90],
+            template= "simple_white")
+
+    fig.update_layout(
+        autosize=False,
+        xaxis = dict(
+        range=[1,31], # update
+        tickmode = 'array',
+        tickvals = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
+    ),)
+
+    return fig
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
