@@ -40,6 +40,14 @@ def air_quality_historic_description():
         ## Air Pollutants Over The Past Year
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
+def heatmap(): 
+    """
+    Returns heatmap description in markdown
+    """
+    return html.Div(children=[dcc.Markdown('''
+        ##### Heatmap Displaying Data of Selected Air Pollutant
+        ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
+
 def data_source(): 
     """
     Returns data source description in markdown
@@ -82,6 +90,7 @@ app.layout = html.Div([
     
         air_quality_historic_description(),
         dcc.Graph(id='slideshow', style={'display': 'inline-block', "width":"100%"}),
+        heatmap(),
         dcc.Tabs([
         dcc.Tab(label='pm2.5', children=[
             dcc.Graph(id='heatmap1', style={'display': 'inline'})
@@ -102,8 +111,6 @@ app.layout = html.Div([
             dcc.Graph(id='heatmap6', style={'display': 'inline'})
         ],style={'display': 'inline-block'})], style={'display': 'inline-block'}),
         data_source()
-        
-      
 ])
 
 @app.callback(
