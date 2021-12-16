@@ -6,8 +6,8 @@ def import_data():
     #from datetime import date, timedelta, datetime
     import datetime as dt
 
-    today = dt.date.today()
-    now = dt.datetime.today()
+    now = dt.datetime.utcnow()
+    today = now.date()
 
     # Bring in the live data that refresehes every hour on the 50th minute that captures the current floored hour:
     live = pd.read_csv('https://storage.googleapis.com/project-1050-data/live.csv')
@@ -22,7 +22,11 @@ def import_data():
     dtm = today - dt.timedelta(1)
     dtm = dt.datetime.strptime(str(dtm), '%Y-%m-%d').date()
     live = live[(live['UTC_date']>= dtm)]
+    
+    #today_dt = dt.datetime.strptime(str(now), '%Y-%m-%d').date()
 
+    today_live = live[(live['UTC_date'] == today)]
+    
     # Bring in historical AQI data:
     historic = pd.read_csv('https://storage.googleapis.com/project-1050-data/2021_AQI_hist.csv')
     historic['date'] =pd.to_datetime(historic.date)
@@ -38,4 +42,14 @@ def import_data():
     weather_pred = weather_pred[weather_pred['date_time'] >= now]
     weather_pred = weather_pred.sort_values(by=['date_time'])
 
-    return live , historic , weather_pred
+
+    pol_stats = today_live.copy()
+    pol_stats = pol_stats[['state','pm2.5','co','no2','o3']]
+
+    usa_stats = pol_stats[['pm2.5','co','no2','o3']]
+    usa_stats['country'] = 'USA'
+    cols = ['country','pm2.5','co','no2','o3']
+    usa_stats = usa_stats[cols]
+    usa_stats = usa_stats.groupby('country', as_index=False).mean()
+
+    return live , historic , weather_pred, pol_stats, usa_stats

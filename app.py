@@ -13,8 +13,8 @@ from data_manipulation import import_data
 from weather_visuals import icons
 import calendar
 
-#live, aqi_hist, weather_pred = import_data()
-live, aqi_hist, weather_pred = import_data()
+live, aqi_hist, weather_pred, pol_stats, usa_stats = import_data()
+
 
 def page_header():
     """
@@ -49,8 +49,9 @@ app.layout = html.Div([
         options=[{'value': x, 'label': x} 
                  for x in live['state']],
         value="Rhode Island"),
-        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '33%','display': 'inline-block'} ),
-        dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '33%','display': 'inline-block'} ),
+        dcc.Graph(id="bar", style={'height':'30%','width': '25%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_temp', style={'height':'30%','width': '25%','display': 'inline-block'} ),
+        dcc.Graph(id='gen_metrics_feels', style={'height':'30%','width': '25%','display': 'inline-block'} ),
         dash.html.Img(id='gen_metrics_icons', style={'height':'30%','width': '20%','display': 'inline-block',  
         'padding-top': '50px','padding-bottom': '50px' } ),
         dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
@@ -244,6 +245,36 @@ def display_graph(states):
                    hoverongaps = False))
 
     return fig1, fig2, fig3, fig4, fig5, fig6
+
+
+@app.callback(
+    Output("bar", "figure"), 
+    [Input("states", "value")])
+def display_graph(states):
+
+    df = pol_stats[pol_stats['state'].eq(states)]
+    df = df.melt(id_vars=["state"], 
+        var_name="Pollution", 
+        value_name="Value")
+    df_usa = usa_stats.melt(id_vars=["country"], 
+        var_name="Pollution", 
+        value_name="Value")
+
+    concat_df = pd.concat([df, df_usa.rename(columns={'country':'state'})])
+
+
+    fig = px.bar(concat_df, x="Value", y="Pollution", orientation='h', color='state', barmode="group")
+    fig.update_xaxes(title_text='AQI')
+    fig.update_yaxes(title_text='Today\'s Air Quality Index by Pollutant')
+    fig.update_layout(legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="right",
+    x=1))
+    return fig
+
+
 
 
 if __name__ == '__main__':
