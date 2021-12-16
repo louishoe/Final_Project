@@ -38,6 +38,8 @@ def air_quality_historic_description():
     """
     return html.Div(children=[dcc.Markdown('''
         ## Air Pollutants Over The Past Year
+        
+        ##### Note: the graphs below may take up to 30 seconds to load!
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 def heatmap(): 
@@ -316,7 +318,7 @@ def display_graph(states):
             y=" pm25", 
             animation_frame="date", animation_group="state",
            size="pop", color="state", hover_name="state", facet_col="region", text="state",
-           title="Comparing AQI of {state}\'s Neighboring States. (Note: this graph may take uo to 30 seconds to load)".format(state=states), 
+           title="Comparing AQI of {state}\'s Neighboring States".format(state=states), 
             size_max=45, range_x=[1,31],range_y=[0,90],
             template= "simple_white")
 
