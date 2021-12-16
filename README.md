@@ -2,7 +2,7 @@
 
 This project displays the historical, current, and forecasted weather, along side polution elements across the United States.
 
-### Environment
+## Environment
 
 python ???
 
@@ -10,7 +10,7 @@ pip ???
 
 Also see requirement.txt for more
 
-### References
+## References
 https://api.openweathermap.org
 
 https://visual-crossing-weather.p.rapidapi.com/forecast
