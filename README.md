@@ -11,5 +11,7 @@ Also see requirement.txt for more
 
 ## References
 https://api.openweathermap.org
+
 https://visual-crossing-weather.p.rapidapi.com/forecast
+
 https://aqicn.org/city/usa
