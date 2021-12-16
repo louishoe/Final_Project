@@ -27,11 +27,11 @@ def weather_description():
 
 def air_quality_historic_description():
     """
-    Returns aqi historic heatmap description in markdown
+    Returns aqi historic description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
-        ## AQI Heatmap 2021 
-        ### The heatmap shows the air pollutents through out 2021.
+        ## 2021 Air Quality Index
+        ### Interactive graphs of air pollutents through out 2021.
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 def data_source(): 
