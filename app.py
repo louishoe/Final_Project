@@ -70,8 +70,9 @@ app.layout = html.Div([
 
         dcc.Graph(id="USA_MAP",style={'width': '50%','display': 'inline-block'}),
         dcc.Graph(id="bar_line", style={'width': '50%','display': 'inline-block'}),
-        air_quality_historic_description(),
         dcc.Graph(id="Weahter_forecast", style={'width': '100%'}),
+    
+        air_quality_historic_description(),
         dcc.Graph(id='slideshow', style={'display': 'inline'}),
         dcc.Tabs([
         dcc.Tab(label='pm2.5', children=[
