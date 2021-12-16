@@ -239,7 +239,7 @@ def display_graph(states):
     aqi_hist_month = df.fillna(0)
     df = aqi_hist_month[aqi_hist_month['state'].eq(states)]
     
-    df1 = aqi_hist_month[['month','day', ' pm25']].reset_index(drop=True)
+    df1 = df[['month','day', ' pm25']].reset_index(drop=True)
     df1 = df1.sort_values(by=['month','day'])
     df1['Month_name'] = df1['month'].apply(lambda x: calendar.month_abbr[x])
     fig1 = go.Figure(data=go.Heatmap(
@@ -248,7 +248,7 @@ def display_graph(states):
                    y=df1['Month_name'],
                    hoverongaps = False))
 
-    df2 = aqi_hist_month[['month','day', ' o3']].reset_index(drop=True)
+    df2 = df[['month','day', ' o3']].reset_index(drop=True)
     df2 = df2.sort_values(by=['month','day'])
     df2['Month_name'] = df2['month'].apply(lambda x: calendar.month_abbr[x])
     fig2 = go.Figure(data=go.Heatmap(
@@ -257,7 +257,7 @@ def display_graph(states):
                    y=df2['Month_name'],
                    hoverongaps = False))
 
-    df3 = aqi_hist_month[['month','day', ' pm10']].reset_index(drop=True)
+    df3 = df[['month','day', ' pm10']].reset_index(drop=True)
     df3 = df3.sort_values(by=['month','day'])
     df3['Month_name'] = df3['month'].apply(lambda x: calendar.month_abbr[x])
     fig3 = go.Figure(data=go.Heatmap(
@@ -266,7 +266,7 @@ def display_graph(states):
                    y=df3['Month_name'],
                    hoverongaps = False))
 
-    df4 = aqi_hist_month[['month','day', ' no2']].reset_index(drop=True)
+    df4 = df[['month','day', ' no2']].reset_index(drop=True)
     df4 = df4.sort_values(by=['month','day'])
     df4['Month_name'] = df4['month'].apply(lambda x: calendar.month_abbr[x])
     fig4 = go.Figure(data=go.Heatmap(
@@ -275,7 +275,7 @@ def display_graph(states):
                    y=df4['Month_name'],
                    hoverongaps = False))
 
-    df5 = aqi_hist_month[['month','day', ' so2']].reset_index(drop=True)
+    df5 = df[['month','day', ' so2']].reset_index(drop=True)
     df5 = df5.sort_values(by=['month','day'])
     df5['Month_name'] = df5['month'].apply(lambda x: calendar.month_abbr[x])
     fig5 = go.Figure(data=go.Heatmap(
@@ -284,7 +284,7 @@ def display_graph(states):
                    y=df5['Month_name'],
                    hoverongaps = False))
 
-    df6 = aqi_hist_month[['month','day', ' co']].reset_index(drop=True)
+    df6 = df[['month','day', ' co']].reset_index(drop=True)
     df6 = df6.sort_values(by=['month','day'])
     df6['Month_name'] = df6['month'].apply(lambda x: calendar.month_abbr[x])
     fig6 = go.Figure(data=go.Heatmap(
