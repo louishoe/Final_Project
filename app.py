@@ -21,7 +21,10 @@ def weather_description():
     Returns weather dashboard description in markdown. Default is Providence, Rhode Island
     """
     return html.Div(children=[dcc.Markdown('''
-        ## Current Weather and Air Quality Index
+        ## State Level Analysis Across the United States
+        #### Knowing the weather and air quality is becoming increasingly important with all the current events, such as global warming, wildfires, and COVID. According to the World Health Organization (WHO), air pollution is responsible for 7 million deaths per year. We want to provide a one-stop dashboard for not only the current and forecast, but also historic air quality data that users can interact with. This dashboard contains live weather information and air quality index (AQI) on the hour, weather predictions, and historic AQI across 50 state capitals in the USA.
+        #### Temperature is measured in Fahrenheit and time is reported in Universal Time (UTC). The major pollutants are ozone (O3), particulate matter 2.5 and 10 (PM 2.5 and PM 10), Sulphur Dioxide (SO2), Carbon Monoxide (CO), and Nitrogen Dioxide (NO2).
+        #### Feel free to interact with the dashboard! Zoom into the map, hover over data points, slide the date bar to compare AQI's of neighboring states, or see the differences between pollutants over the past year.
         ### Please select a state
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
@@ -30,8 +33,7 @@ def air_quality_historic_description():
     Returns aqi historic description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
-        ## 2021 Air Quality Index
-        ### Interactive graphs of air pollutents through out 2021.
+        ## Air Pollutents Over The Past Year
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 def data_source(): 
@@ -39,6 +41,8 @@ def data_source():
     Returns data source description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
+        ##### GitHub: 
+        ##### https://github.com/Data-1050-JLM/Final_Project
         ##### Data Source:
         ##### Live Weather [OpenWeather](http://openweathermap.org/) **updates every hour**
         ##### Live Air Quality Index [The World Air Quality Project](http://aqicn.org/) **updates every hour**
@@ -51,7 +55,7 @@ server = app.server
 
 
 app.layout = html.Div([
-        html.P("Weather and Pollution Analysis in the United States by State:"),
+        html.P("Weather and Air Quality Tracker"),
         weather_description(),
         dcc.Dropdown(
         id='states', 
@@ -314,20 +318,6 @@ def display_graph(states):
     ),)
 
     return fig
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
