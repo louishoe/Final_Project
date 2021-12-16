@@ -22,9 +22,13 @@ def weather_description():
     """
     return html.Div(children=[dcc.Markdown('''
         ## State Level Analysis Across the United States
+        
         #### Knowing the weather and air quality is becoming increasingly important with all the current events, such as global warming, wildfires, and COVID. According to the World Health Organization (WHO), air pollution is responsible for 7 million deaths per year. We want to provide a one-stop dashboard for not only the current and forecast, but also historic air quality data that users can interact with. This dashboard contains live weather information and air quality index (AQI) on the hour, weather predictions, and historic AQI across 50 state capitals in the USA.
+        
         #### Temperature is measured in Fahrenheit and time is reported in Universal Time (UTC). The major pollutants are ozone (O3), particulate matter 2.5 and 10 (PM 2.5 and PM 10), Sulphur Dioxide (SO2), Carbon Monoxide (CO), and Nitrogen Dioxide (NO2).
+        
         #### Feel free to interact with the dashboard! Zoom into the map, hover over data points, slide the date bar to compare AQI's of neighboring states, or see the differences between pollutants over the past year.
+        
         ### Please select a state
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
@@ -33,7 +37,7 @@ def air_quality_historic_description():
     Returns aqi historic description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
-        ## Air Pollutents Over The Past Year
+        ## Air Pollutants Over The Past Year
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 def data_source(): 
