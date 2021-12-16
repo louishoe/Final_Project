@@ -13,7 +13,7 @@ from data_manipulation import import_data
 from weather_visuals import icons
 import calendar
 
-live, aqi_hist, weather_pred, pol_stats, region_df = import_data()
+live, aqi_hist, weather_pred, pol_stats, region_df, today_live, usa_stats = import_data()
 
 
 def weather_description():
@@ -40,6 +40,7 @@ def air_quality_historic_description():
         ## Air Pollutants Over The Past Year
         
         ##### Note: the graphs below may take up to 30 seconds to load!
+        ##### The bubble size below represents state population.
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 def heatmap(): 
@@ -189,12 +190,12 @@ def weather_pre(states):
     Output("gen_metrics_icons", 'src'),
     [Input("states", "value")])
 def general_metrics(states):
-    daily_metrics = live[live['state']==states]
+    daily_metrics = today_live[today_live['state'].eq(states)]
     daily_metrics['hour'] = daily_metrics['UTC_time'].str[:2]
     daily_metrics['hour'] = daily_metrics['hour'].astype(str).astype(int)
     daily_metrics = daily_metrics.loc[daily_metrics.groupby(['city', 'state'])['hour'].idxmax()]
     daily_metrics = daily_metrics[['city', 'state','Temperature', 'feels_like','weather_description']]
-    
+
     fig1 = go.Figure(go.Indicator(
     mode = "number",
     value = daily_metrics.Temperature.values[0],
@@ -210,10 +211,10 @@ def general_metrics(states):
     domain = {'x': [0, 1], 'y': [0, 1]}))
 
     cur_state = pol_stats[pol_stats['state'].eq(states)]
+    cur_state = cur_state.iloc[-1:]
     cur_state = cur_state.melt(id_vars=["state"], 
         var_name="Pollution", 
         value_name="Value")
-
 
     fig3 = go.Figure(go.Indicator(
     mode = "number",
@@ -221,10 +222,10 @@ def general_metrics(states):
         number = {'font': {"size":65 }},
         title = {"text": "Current State AQI<br><span style='font-size:0.8em;color:gray'>{state}</span>".format(state=states)},
     domain = {'x': [0, 1], 'y': [0, 1]}))
-
+ 
     fig4 = go.Figure(go.Indicator(
     mode = "number",
-    value = pol_stats.aqi.mean(),
+    value = usa_stats.aqi[0],
         number = {'font': {"size":65 }},
         title = {"text": "Average State AQI<br><span style='font-size:0.8em;color:gray'>Overall</span>"},
     domain = {'x': [0, 1], 'y': [0, 1]}))
