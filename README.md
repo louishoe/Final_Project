@@ -8,8 +8,6 @@ https://gitpod.io/#https://github.com/Data-1050-JLM/Final_Project
 
 python 3.8.8
 
-pip ???
-
 Also see requirement.txt for more
 
 ## References
