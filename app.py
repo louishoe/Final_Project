@@ -59,23 +59,23 @@ app.layout = html.Div([
         dcc.Graph(id="Weahter_forecast", style={'width': '40%'}),
         dcc.Tabs([
         dcc.Tab(label='pm2.5', children=[
-            dcc.Graph(id='heatmap1', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '5%','display': 'inline-block'}),
+            dcc.Graph(id='heatmap1', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
         dcc.Tab(label='o3', children=[
-            dcc.Graph(id='heatmap2', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '5%','display': 'inline-block'}),
+            dcc.Graph(id='heatmap2', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
         dcc.Tab(label='pm10', children=[
-            dcc.Graph(id='heatmap3', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '5%','display': 'inline-block'}),
+            dcc.Graph(id='heatmap3', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
          dcc.Tab(label='no2', children=[
-            dcc.Graph(id='heatmap4', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '5%','display': 'inline-block'}),
+            dcc.Graph(id='heatmap4', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
          dcc.Tab(label='so2', children=[
-            dcc.Graph(id='heatmap5', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '5%','display': 'inline-block'}),
+            dcc.Graph(id='heatmap5', style={'display': 'inline'})
+        ],style={'display': 'inline-block'}),
          dcc.Tab(label='co', children=[
-            dcc.Graph(id='heatmap6', style={'width': '50%','display': 'inline-block'})
-        ],style={'width': '5%','display': 'inline-block'})], style={'display': 'inline-block'})
+            dcc.Graph(id='heatmap6', style={'display': 'inline'})
+        ],style={'display': 'inline-block'})], style={'display': 'inline-block'})
       
 ])
 
@@ -135,8 +135,6 @@ def weather_pre(states):
     fig = px.line(
         x = df['date_time'],
         y = df['Temperature'],
-        #error_y = df['Maximum Temperature']
-        #error_y_minus= df['Minimum Temperature']
     )
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(title_text='Temperture (°F)')
@@ -152,7 +150,6 @@ def weather_pre(states):
     Output("gen_metrics_icons", 'src'),
     [Input("states", "value")])
 def general_metrics(states):
-    #daily_metrics = live.copy()
     daily_metrics = live[live['state']==states]
     daily_metrics['hour'] = daily_metrics['UTC_time'].str[:2]
     daily_metrics['hour'] = daily_metrics['hour'].astype(str).astype(int)
