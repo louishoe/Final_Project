@@ -4,7 +4,7 @@ This project displays the historical, current, and forecasted weather, along sid
 
 ## Environment
 
-python ???
+python 3.8.8
 
 pip ???
 
